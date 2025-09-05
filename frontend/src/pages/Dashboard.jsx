@@ -3,12 +3,20 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-// Component to show each note card
+
+// ✅ Reusable component to show each note card
 function NoteCard({ note, onEdit, onDelete }) {
   return (
-    <div className="bg-white shadow-md p-5 rounded-xl hover:shadow-xl transition">
-      <h3 className="font-bold text-xl mb-2">{note.title}</h3>
-      <p className="text-gray-600 mb-4">{note.content}</p>
+    <div className="bg-white dark:bg-gray-800 shadow-md p-5 rounded-xl hover:shadow-xl transition w-full h-full">
+      {/* Note Title */}
+      <h3 className="font-bold text-xl mb-2 text-gray-900 dark:text-white">
+        {note.title}
+      </h3>
+
+      {/* Note Content */}
+      <p className="text-gray-600 dark:text-gray-300 mb-4">{note.content}</p>
+
+      {/* Action Buttons (Edit + Delete) */}
       <div className="flex gap-2">
         <button
           onClick={() => onEdit(note)}
@@ -27,20 +35,22 @@ function NoteCard({ note, onEdit, onDelete }) {
   );
 }
 
-export default function Dashboard() {
-  const navigate = useNavigate();
-  const [notes, setNotes] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  // Fetch all notes from backend
+// ✅ Dashboard Component
+export default function Dashboard() {
+  const navigate = useNavigate(); // Navigation hook
+  const [notes, setNotes] = useState([]); // Store notes data
+  const [loading, setLoading] = useState(true); // Track loading state
+
+  // 🔹 Fetch all notes from backend
   const fetchNotes = async () => {
     try {
       const response = await axios.get("https://your-api.com/notes", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Send auth token if available
         },
       });
-      setNotes(response.data);
+      setNotes(response.data); // Save fetched notes
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -49,11 +59,12 @@ export default function Dashboard() {
     }
   };
 
+  // 🔹 Run once when component mounts
   useEffect(() => {
     fetchNotes();
   }, []);
 
-  // Handle delete note
+  // 🔹 Handle delete note
   const handleDelete = async (id) => {
     try {
       await axios.delete(`https://your-api.com/notes/${id}`, {
@@ -67,24 +78,30 @@ export default function Dashboard() {
     }
   };
 
-  // Handle edit note (navigate to edit page or open modal)
+  // 🔹 Handle edit note (navigate to edit page)
   const handleEdit = (note) => {
-    // Example: navigate to /edit/:id page
     navigate(`/edit/${note.id}`);
   };
 
+  // 🔹 Show loading screen while fetching notes
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-xl font-bold">Loading notes...</p>
+      <div className="flex justify-center items-center w-full min-h-screen bg-gray-100 dark:bg-gray-900">
+        <p className="text-xl font-bold text-gray-800 dark:text-gray-200">
+          Loading notes...
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100">
+    <div className="w-full min-h-screen flex flex-col p-6 bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
+      
+      {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-4xl font-extrabold text-gray-800">Your Notes</h1>
+        <h1 className="text-4xl font-extrabold text-gray-800 dark:text-white">
+          Your Notes
+        </h1>
         <button
           onClick={() => navigate("/AddNote")}
           className="py-2 px-5 bg-green-500 text-white font-bold rounded-xl shadow-lg hover:bg-green-600 transition"
@@ -93,12 +110,15 @@ export default function Dashboard() {
         </button>
       </div>
 
+      {/* Notes Section */}
       {notes.length === 0 ? (
-        <p className="text-gray-700 text-center mt-10 text-lg">
+        // No notes found message
+        <p className="text-gray-700 dark:text-gray-300 text-center mt-10 text-lg">
           No notes found. Click "Add Note" to create one!
         </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        // Grid of notes (responsive layout)
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {notes.map((note) => (
             <NoteCard
               key={note.id}

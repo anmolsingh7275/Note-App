@@ -8,18 +8,27 @@ import Login from './pages/Login'
 import AddNote from './pages/AddNote'
 import Dashboard from './pages/Dashboard'
 import EditNote from './pages/Edit'
+import Navbar from './Components/Navbar'
 function App() {
 
   return (
     <>
  
-   <Routes>
-<Route path='/Signup' element = {<Signup />}/>
-<Route path='/Login' element = {<Login />}/>
-<Route path='/AddNote' element = {<AddNote />}/>
-<Route path='/Dashboard' element = {<Dashboard/>}/>
-<Route path='/Edit' element = {<EditNote/>}/>
-   </Routes>
+        <div className="min-h-screen w-screen bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
+        <Navbar />
+
+        {/* main should take the remaining space; keep it full width */}
+        <main className="w-full min-h-[calc(100vh-64px)]"> 
+          <Routes>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/AddNote" element={<AddNote />} />
+            <Route path="/edit/:id" element={<EditNote />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </Routes>
+        </main>
+      </div>
+
     </>
   )
 }
