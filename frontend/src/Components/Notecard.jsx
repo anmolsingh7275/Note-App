@@ -9,7 +9,7 @@ const colors = [
   "#EDE9FE", // purple
   "#DCFCE7", // green
   "#DBEAFE", // blue
-  "#FFE5B4", // orange
+
 ];
 
 export default function NoteCard({ note, index, onEdit, onDelete, onToggleFavorite }) {
