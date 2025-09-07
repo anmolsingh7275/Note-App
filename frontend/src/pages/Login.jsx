@@ -1,35 +1,46 @@
+// src/pages/Login.jsx
 import { useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "../api.js"; // Your backend API call
 import { toast } from "react-toastify";
 
 export default function Login() {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  // Handle input changes
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
-      // Replace with your backend API
-      const response = await axios.post("https://your-api.com/login", formData);
+      // Call backend API with email and password
+      const data = await loginUser(formData.email, formData.password);
+
+      // Save token in localStorage
+      localStorage.setItem("token", data.token);
+
+      // Show success toast
       toast.success("Login successful!");
-      console.log(response.data);
-      // Optionally: save token to localStorage/sessionStorage
-      // localStorage.setItem("token", response.data.token);
-    } catch (error) {
-      toast.error("Login failed. Please check your credentials.");
-      console.error(error.response?.data || error.message);
+
+      // Redirect to dashboard
+      navigate("/dashboard");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Login failed! Check your credentials.");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="login-container min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 via-blue-100 to-purple-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="login-box bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-2xl w-full max-w-md transform hover:scale-105 transition duration-300">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 via-blue-100 to-purple-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+      <div className="bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-2xl w-full max-w-md transform hover:scale-105 transition duration-300">
         <h2 className="text-4xl font-extrabold text-center text-gradient bg-clip-text text-transparent bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 mb-8">
           Login
         </h2>
@@ -70,9 +81,10 @@ export default function Login() {
           {/* Submit */}
           <button
             type="submit"
+            disabled={loading}
             className="w-full py-3 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition transform duration-300 dark:from-green-600 dark:via-blue-600 dark:to-purple-600"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 

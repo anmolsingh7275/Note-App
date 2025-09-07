@@ -10,6 +10,9 @@ import Dashboard from './pages/Dashboard'
 import EditNote from './pages/Edit'
 import Navbar from './Components/Navbar'
 import NoteCard from './Components/Notecard'
+import Home from './pages/Home'
+import { fromUnixTime } from 'date-fns'
+
 function App() {
 
   return (
@@ -24,6 +27,7 @@ function App() {
 
         <main className="w-full min-h-[calc(100vh-64px)]"> 
           <Routes>
+               <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/AddNote" element={<AddNote />} />
             <Route path="/edit/:id" element={<EditNote />} />

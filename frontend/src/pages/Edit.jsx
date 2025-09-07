@@ -1,69 +1,41 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
+import { getNoteById, updateNote } from "../api.js";
 import { toast } from "react-toastify";
 
 export default function EditNote() {
-  const { id } = useParams(); // get note id from URL
+  const { id } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ title: "", content: "" });
   const [loading, setLoading] = useState(true);
 
-  // Fetch the existing note details
   useEffect(() => {
-    const fetchNote = async () => {
+    async function fetchNote() {
       try {
-        const response = await axios.get(`https://your-api.com/notes/${id}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        setFormData({
-          title: response.data.title,
-          content: response.data.content,
-        });
-        setLoading(false);
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to load note!");
+        const data = await getNoteById(id);
+        setFormData({ title: data.title, content: data.content });
+      } catch (err) {
+        toast.error("Failed to load note");
+        console.error(err);
+      } finally {
         setLoading(false);
       }
-    };
-
+    }
     fetchNote();
   }, [id]);
 
-  // Handle input changes
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // Submit updated note
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(
-        `https://your-api.com/notes/${id}`,
-        { title: formData.title, content: formData.content },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-      toast.success("Note updated successfully!");
+      await updateNote(id, formData);
+      toast.success("Note updated!");
       navigate("/dashboard");
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to update note!");
+    } catch (err) {
+      toast.error("Update failed");
+      console.error(err);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen dark:bg-gray-900">
-        <p className="text-xl font-bold text-gray-800 dark:text-gray-200">
-          Loading note...
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">

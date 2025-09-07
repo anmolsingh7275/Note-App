@@ -1,38 +1,38 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import NoteCard from "../components/NoteCard";   // make sure folder name matches
-import SearchBar from "../components/SearchBar";
-import { useToast } from "../components/Toast";  // import toast
+import NoteCard from "../Components/Notecard";
+import SearchBar from "../Components/SearchBar";
+import { useToast } from "../Components/Toast";
+import { getNotes, deleteNote, toggleFavorite } from "../api.js";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { showToast } = useToast(); // Toast hook
+  const { showToast } = useToast();
 
-  const [notes, setNotes] = useState([]); // Notes from backend
-  const [searchTerm, setSearchTerm] = useState(""); // Search input
+  const [notes, setNotes] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Fetch notes from backend API
-  useEffect(() => {
-    async function fetchNotes() {
-      try {
-        const response = await fetch("/api/notes"); // Replace with your backend endpoint
-        if (!response.ok) throw new Error("Failed to fetch notes");
-        const data = await response.json();
-        setNotes(data);
-        showToast("Notes loaded ✅", "success");
-      } catch (error) {
-        console.error("Failed to fetch notes:", error);
-        showToast("Failed to fetch notes ❌", "error");
-      } finally {
-        setLoading(false);
-      }
+  // Fetch notes from backend
+  const fetchNotes = async () => {
+    setLoading(true);
+    try {
+      const data = await getNotes(); // use api.js function
+      setNotes(data);
+      showToast("Notes loaded ✅", "success");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to load notes ❌", "error");
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     fetchNotes();
-  }, [showToast]);
+  }, []);
 
-  // Filter notes based on search term
+  // Filter notes
   const filteredNotes = notes.filter(
     (note) =>
       note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -42,44 +42,29 @@ export default function Dashboard() {
   // Handlers
   const handleDelete = async (id) => {
     try {
-      const res = await fetch(`/api/notes/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Delete failed");
-      setNotes(notes.filter((note) => note.id !== id));
-      showToast("Note deleted successfully ✅", "success");
-    } catch (error) {
-      console.error("Failed to delete note:", error);
+      await deleteNote(id);
+      setNotes(notes.filter((n) => n._id !== id));
+      showToast("Note deleted ✅", "success");
+    } catch (err) {
+      console.error(err);
       showToast("Failed to delete note ❌", "error");
     }
   };
 
-  const handleEdit = (note) => {
-    navigate(`/edit/${note.id}`);
-    showToast("Editing note...", "info");
+  const handleEdit = (id) => {
+    navigate(`/edit-note/${id}`);
   };
 
   const handleToggleFavorite = async (id) => {
     try {
-      const updatedNotes = notes.map((note) =>
-        note.id === id ? { ...note, favorite: !note.favorite } : note
-      );
-      setNotes(updatedNotes);
-
-      const favoriteStatus = updatedNotes.find((n) => n.id === id).favorite;
-
-      const res = await fetch(`/api/notes/${id}/favorite`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ favorite: favoriteStatus }),
-      });
-
-      if (!res.ok) throw new Error("Favorite update failed");
-
+      const updatedNote = await toggleFavorite(id);
+      setNotes(notes.map((n) => (n._id === id ? updatedNote : n)));
       showToast(
-        favoriteStatus ? "Added to favorites ⭐" : "Removed from favorites ❌",
+        updatedNote.favorite ? "Added to favorites ⭐" : "Removed from favorites ❌",
         "success"
       );
-    } catch (error) {
-      console.error("Failed to toggle favorite:", error);
+    } catch (err) {
+      console.error(err);
       showToast("Failed to update favorite ❌", "error");
     }
   };
@@ -116,12 +101,12 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {filteredNotes.map((note, index) => (
             <NoteCard
-              key={note.id}
+              key={note._id}
               note={note}
               index={index}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onToggleFavorite={handleToggleFavorite}
+              onEdit={() => handleEdit(note._id)}
+              onDelete={() => handleDelete(note._id)}
+              onToggleFavorite={() => handleToggleFavorite(note._id)}
             />
           ))}
         </div>

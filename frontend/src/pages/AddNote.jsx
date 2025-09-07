@@ -1,47 +1,41 @@
+// src/pages/AddNote.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { createNote } from "../api.js"; // your API function
 import { toast } from "react-toastify";
 
 export default function AddNote() {
-  const navigate = useNavigate(); // For redirecting after adding note
+  const navigate = useNavigate();
+  const [noteData, setNoteData] = useState({ title: "", content: "" });
+  const [loading, setLoading] = useState(false);
 
-  const [noteData, setNoteData] = useState({
-    title: "",
-    content: "",
-  });
-
-  // Handle input changes
+  // Correct handleChange function
   const handleChange = (e) => {
     setNoteData({ ...noteData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Simple validation
     if (!noteData.title || !noteData.content) {
       toast.error("Please fill in all fields!");
       return;
     }
 
+    setLoading(true);
+
     try {
-      // Replace URL with your backend endpoint
-      const response = await axios.post("https://your-api.com/notes", noteData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // If using JWT auth
-        },
-      });
-
+      // Save note in backend
+      await createNote(noteData);
       toast.success("Note added successfully!");
-      console.log("Server Response:", response.data);
-
-      // Redirect to dashboard after adding
-      navigate("/Dashboard");
-    } catch (error) {
-      console.error(error.response?.data || error.message);
-      toast.error("Failed to add note. Try again!");
+      
+      // Navigate back to dashboard, where notes will be fetched
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to add note! Try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -87,9 +81,10 @@ export default function AddNote() {
           <div className="flex gap-4">
             <button
               type="submit"
+              disabled={loading}
               className="flex-1 py-3 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition transform duration-300"
             >
-              Add Note
+              {loading ? "Adding..." : "Add Note"}
             </button>
 
             <button
