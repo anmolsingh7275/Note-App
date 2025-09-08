@@ -1,18 +1,22 @@
 // src/api.js
 import axios from "axios";
 
+// Create axios instance
 const api = axios.create({
-  baseURL: "/api", // handled by Vite proxy
+  baseURL: "http://localhost:5000/api", // direct backend URL (safe for dev)
   headers: { "Content-Type": "application/json" },
 });
 
+// Interceptor to attach token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Auth
+// =====================
+// AUTH ROUTES
+// =====================
 export const registerUser = async (username, email, password) => {
   const res = await api.post("/auth/register", { username, email, password });
   return res.data;
@@ -20,6 +24,7 @@ export const registerUser = async (username, email, password) => {
 
 export const loginUser = async (email, password) => {
   const res = await api.post("/auth/login", { email, password });
+  // Save token for future requests
   localStorage.setItem("token", res.data.token);
   return res.data;
 };
@@ -29,7 +34,9 @@ export const getMe = async () => {
   return res.data;
 };
 
-// Notes
+// =====================
+// NOTES ROUTES
+// =====================
 export const getNotes = async () => {
   const res = await api.get("/notes");
   return res.data;

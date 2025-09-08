@@ -34,18 +34,18 @@ export default function NoteCard({ note, index, onEdit, onDelete, onToggleFavori
       </div>
 
       {/* Title */}
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 truncate">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-black-100 mb-2 truncate">
         {note.title}
       </h3>
 
       {/* Content */}
-      <p className="text-gray-800 dark:text-gray-200 text-sm line-clamp-5">{note.content}</p>
+      <p className="text-gray-800 dark:text-black-200 text-sm line-clamp-5">{note.content}</p>
 
       {/* Footer */}
       <div className="flex justify-between items-center mt-4">
         {/* Date */}
-        <span className="text-gray-700 dark:text-gray-300 text-xs">
-          {format(new Date(note.date), "MMM dd, yyyy")}
+        <span className="text-gray-700 dark:text-black-300 text-xs">
+          {note.date}
         </span>
 
         {/* Action Buttons */}
