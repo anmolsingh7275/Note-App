@@ -1,3 +1,4 @@
+// src/pages/Dashboard.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NoteCard from "../Components/Notecard";
@@ -13,6 +14,18 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // ✅ Protect this route
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      showToast("Please login first 🚪", "error");
+      navigate("/login");
+    } else {
+      fetchNotes();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Fetch notes from backend
   const fetchNotes = async () => {
     setLoading(true);
@@ -27,10 +40,6 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchNotes();
-  }, []);
 
   // Filter notes
   const filteredNotes = notes.filter(

@@ -1,6 +1,6 @@
 // src/pages/Login.jsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../api.js"; // Your backend API call
 import { toast } from "react-toastify";
 
@@ -25,13 +25,18 @@ export default function Login() {
       // Save token in localStorage
       localStorage.setItem("token", data.token);
 
+      // 🔥 Trigger storage event so Navbar updates immediately
+      window.dispatchEvent(new Event("storage"));
+
       // Show success toast
       toast.success("Login successful!");
 
       // Redirect to dashboard
       navigate("/dashboard");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Login failed! Check your credentials.");
+      toast.error(
+        err.response?.data?.message || "Login failed! Check your credentials."
+      );
       console.error(err);
     } finally {
       setLoading(false);
@@ -90,12 +95,12 @@ export default function Login() {
 
         <p className="text-center text-gray-600 dark:text-gray-400 mt-6">
           Don&apos;t have an account?{" "}
-          <a
-            href="/signup"
+          <Link
+            to="/signup"
             className="text-blue-500 dark:text-blue-400 font-semibold hover:underline"
           >
             Sign Up
-          </a>
+          </Link>
         </p>
       </div>
     </div>

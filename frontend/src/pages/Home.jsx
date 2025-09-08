@@ -1,5 +1,5 @@
 // src/pages/Home.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaEye,
@@ -15,7 +15,14 @@ import {
 
 export default function Home() {
   const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem("token");
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+
+  // ✅ Update login status whenever token changes
+  useEffect(() => {
+    const checkLogin = () => setIsLoggedIn(!!localStorage.getItem("token"));
+    window.addEventListener("storage", checkLogin);
+    return () => window.removeEventListener("storage", checkLogin);
+  }, []);
 
   const handleAction = (path) => {
     if (isLoggedIn) {
@@ -27,9 +34,10 @@ export default function Home() {
 
   return (
     <div className="w-full">
-      {/* ==== MAIN CONTENT (everything in one page) ==== */}
+      {/* ==== MAIN CONTENT ==== */}
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-purple-100 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        {/* Hero + Quote */}
+        
+        {/* Hero Section */}
         <header className="flex flex-col items-center justify-center text-center py-20 px-6">
           <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight">
             ✨ Capture, Create & Remember
@@ -124,7 +132,10 @@ export default function Home() {
         </p>
 
         <p className="mt-12 text-sm text-gray-500 dark:text-gray-400">
-          © {new Date().getFullYear()} NoteApp. Built with ❤️ by <span className="font-semibold text-indigo-600 dark:text-indigo-400">Anmol Singh</span>
+          © {new Date().getFullYear()} NoteApp. Built with ❤️ by{" "}
+          <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+            Anmol Singh
+          </span>
         </p>
       </footer>
     </div>

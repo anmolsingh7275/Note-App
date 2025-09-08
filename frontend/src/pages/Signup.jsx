@@ -1,11 +1,15 @@
 // src/pages/Signup.jsx
 import { useState } from "react";
 import { registerUser } from "../api.js"; // Your API call
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
 export default function Signup() {
-  const [formData, setFormData] = useState({ username: "", email: "", password: "" });
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -20,10 +24,17 @@ export default function Signup() {
 
     try {
       // Call backend API with actual form data
-      const data = await registerUser(formData.username, formData.email, formData.password);
+      const data = await registerUser(
+        formData.username,
+        formData.email,
+        formData.password
+      );
 
       // Save token in localStorage
       localStorage.setItem("token", data.token);
+
+      // 🔥 Trigger storage event so Navbar updates immediately
+      window.dispatchEvent(new Event("storage"));
 
       // Show success toast
       toast.success("Signup successful!");
@@ -31,7 +42,9 @@ export default function Signup() {
       // Redirect to dashboard
       navigate("/dashboard");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Signup failed! Check backend server.");
+      toast.error(
+        err.response?.data?.message || "Signup failed! Check backend server."
+      );
       console.error(err);
     } finally {
       setLoading(false);
@@ -48,7 +61,9 @@ export default function Signup() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Username */}
           <div>
-            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Name</label>
+            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">
+              Name
+            </label>
             <input
               type="text"
               name="username"
@@ -62,7 +77,9 @@ export default function Signup() {
 
           {/* Email */}
           <div>
-            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Email</label>
+            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">
+              Email
+            </label>
             <input
               type="email"
               name="email"
@@ -76,7 +93,9 @@ export default function Signup() {
 
           {/* Password */}
           <div>
-            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Password</label>
+            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">
+              Password
+            </label>
             <input
               type="password"
               name="password"
@@ -100,12 +119,12 @@ export default function Signup() {
 
         <p className="text-center text-gray-600 dark:text-gray-400 mt-6">
           Already have an account?{" "}
-          <a
-            href="/login"
+          <Link
+            to="/login"
             className="text-purple-500 dark:text-purple-400 font-semibold hover:underline"
           >
             Login
-          </a>
+          </Link>
         </p>
       </div>
     </div>
