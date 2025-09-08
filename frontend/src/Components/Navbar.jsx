@@ -3,13 +3,30 @@ import { Link, useNavigate } from "react-router-dom";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    !!localStorage.getItem("token")
+  );
   const [darkMode, setDarkMode] = useState(
     localStorage.getItem("theme") === "dark"
   );
   const navigate = useNavigate();
 
-  // Apply dark/light theme to <html>
+  // ✅ Check token when component mounts AND whenever route changes
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, [navigate]);
+
+  // ✅ Sync login state across multiple tabs
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIsLoggedIn(!!localStorage.getItem("token"));
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // ✅ Toggle dark/light theme
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
@@ -20,22 +37,15 @@ export default function Navbar() {
     }
   }, [darkMode]);
 
-  // Check login status
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-  }, []);
-
-  // Logout handler
+  // ✅ Logout handler
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
-    navigate("/login");
+    navigate("/"); // redirect to home
   };
 
   return (
     <nav className="bg-purple-600 dark:bg-gray-900 text-white shadow-md w-full">
-      {/* Full-width row */}
       <div className="w-full px-6 py-3 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="text-2xl font-bold tracking-wide">
@@ -52,7 +62,10 @@ export default function Navbar() {
               >
                 Dashboard
               </Link>
-              <Link to="/add" className="hover:text-yellow-300 transition">
+              <Link
+                to="/addnote"
+                className="hover:text-yellow-300 transition"
+              >
                 Add Note
               </Link>
               <button
@@ -129,7 +142,7 @@ export default function Navbar() {
                 Dashboard
               </Link>
               <Link
-                to="/add"
+                to="/addnote"
                 onClick={() => setMenuOpen(false)}
                 className="block hover:text-yellow-300 transition"
               >

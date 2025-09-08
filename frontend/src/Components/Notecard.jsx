@@ -1,65 +1,76 @@
 import React, { useState } from "react";
 import { FaStar, FaEdit, FaTrash } from "react-icons/fa";
-import { format } from "date-fns";
 
-// Pastel background colors
+// Pastel background + matching border colors
 const colors = [
-  "#FEF3C7", // yellow
-  "#FBCFE8", // pink
-  "#EDE9FE", // purple
-  "#DCFCE7", // green
-  "#DBEAFE", // blue
-
+  { bg: "#FEF3C7", border: "#FACC15" }, // yellow
+  { bg: "#FBCFE8", border: "#EC4899" }, // pink
+  { bg: "#EDE9FE", border: "#8B5CF6" }, // purple
+  { bg: "#DCFCE7", border: "#22C55E" }, // green
+  { bg: "#DBEAFE", border: "#3B82F6" }, // blue
 ];
 
-export default function NoteCard({ note, index, onEdit, onDelete, onToggleFavorite }) {
+export default function NoteCard({
+  note,
+  index,
+  onEdit,
+  onDelete,
+  onToggleFavorite,
+}) {
   const [hovered, setHovered] = useState(false);
-  const bgColor = colors[index % colors.length];
+  const colorSet = colors[index % colors.length];
 
   return (
     <div
-      style={{ backgroundColor: bgColor }}
-      className={`relative rounded-xl p-5 shadow-lg border border-gray-300 dark:border-gray-600 transition transform ${
-        hovered ? "-translate-y-1 shadow-2xl" : ""
+      style={{
+        backgroundColor: hovered ? `${colorSet.bg}dd` : colorSet.bg, // pastel bg
+        borderColor: colorSet.border, // colorful border
+      }}
+      className={`relative rounded-2xl p-5 border-2 transition transform ${
+        hovered ? "-translate-y-1 shadow-2xl" : "shadow-lg"
       } cursor-pointer`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Favorite Star */}
       <div
-        className="absolute top-3 right-3 cursor-pointer text-yellow-400 dark:text-yellow-300"
+        className="absolute top-3 right-3 cursor-pointer"
         onClick={() => onToggleFavorite(note.id)}
       >
-        <FaStar className={note.favorite ? "fill-current text-yellow-400 dark:text-yellow-300" : "text-gray-400"} />
+        <FaStar
+          className={`h-5 w-5 transition ${
+            note.favorite
+              ? "text-yellow-500"
+              : "text-gray-500 hover:text-yellow-400"
+          }`}
+        />
       </div>
 
       {/* Title */}
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-black-100 mb-2 truncate">
+      <h3 className="text-lg font-semibold text-black mb-2 truncate">
         {note.title}
       </h3>
 
       {/* Content */}
-      <p className="text-gray-800 dark:text-black-200 text-sm line-clamp-5">{note.content}</p>
+      <p className="text-black text-sm line-clamp-5">{note.content}</p>
 
       {/* Footer */}
       <div className="flex justify-between items-center mt-4">
         {/* Date */}
-        <span className="text-gray-700 dark:text-black-300 text-xs">
-          {note.date}
-        </span>
+        <span className="text-gray-800 text-xs">{note.date}</span>
 
         {/* Action Buttons */}
         <div className="flex space-x-2">
           <button
             onClick={() => onEdit(note.id)}
-            className="p-2 rounded-full bg-gray-800 text-white hover:bg-gray-700 transition"
+            className="p-2 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 transition shadow"
             title="Edit"
           >
             <FaEdit />
           </button>
           <button
             onClick={() => onDelete(note.id)}
-            className="p-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition"
+            className="p-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition shadow"
             title="Delete"
           >
             <FaTrash />
