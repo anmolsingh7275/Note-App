@@ -61,7 +61,7 @@ export default function Dashboard() {
   };
 
   const handleEdit = (id) => {
-    navigate(`/edit-note/${id}`);
+   navigate(`/edit/${id}`);  
   };
 
   const handleToggleFavorite = async (id) => {

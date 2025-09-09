@@ -13,7 +13,12 @@ export default function EditNote() {
     async function fetchNote() {
       try {
         const data = await getNoteById(id);
-        setFormData({ title: data.title, content: data.content });
+        if (data) {
+          setFormData({ title: data.title, content: data.content });
+        } else {
+          toast.error("Note not found");
+          navigate("/dashboard");
+        }
       } catch (err) {
         toast.error("Failed to load note");
         console.error(err);
@@ -22,7 +27,16 @@ export default function EditNote() {
       }
     }
     fetchNote();
-  }, [id]);
+  }, [id, navigate]);
+
+  // ✅ Added handleChange
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,6 +50,13 @@ export default function EditNote() {
     }
   };
 
+  if (loading) {
+    return (
+      <p className="text-center text-lg text-gray-600 dark:text-gray-300 mt-20">
+        Loading note...
+      </p>
+    );
+  }
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
