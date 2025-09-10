@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
   const [darkMode, setDarkMode] = useState(
     localStorage.getItem("theme") === "dark"
