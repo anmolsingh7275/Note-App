@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaStar, FaEdit, FaTrash } from "react-icons/fa";
+import { FaStar, FaEdit, FaTrash, FaUserPlus } from "react-icons/fa";
 
 // Pastel background + matching border colors
 const colors = [
@@ -16,6 +16,7 @@ export default function NoteCard({
   onEdit,
   onDelete,
   onToggleFavorite,
+  onCollaborate, // ✅ new prop for collaborator modal
 }) {
   const [hovered, setHovered] = useState(false);
   const colorSet = colors[index % colors.length];
@@ -57,7 +58,8 @@ export default function NoteCard({
       {/* Last edited by */}
       {note.lastEditedBy?.username && (
         <p className="text-gray-700 text-xs mt-2">
-          Last edited by: <span className="font-medium">{note.lastEditedBy.username}</span>
+          Last edited by:{" "}
+          <span className="font-medium">{note.lastEditedBy.username}</span>
         </p>
       )}
 
@@ -81,6 +83,13 @@ export default function NoteCard({
             title="Delete"
           >
             <FaTrash />
+          </button>
+          <button
+            onClick={() => onCollaborate(note._id)} // ✅ opens CollaboratorModal
+            className="p-2 rounded-full bg-green-500 text-white hover:bg-green-600 transition shadow"
+            title="Collaborate"
+          >
+            <FaUserPlus />
           </button>
         </div>
       </div>

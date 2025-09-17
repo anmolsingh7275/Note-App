@@ -5,7 +5,7 @@ import { io } from "socket.io-client";
 // AXIOS SETUP
 // =====================
 const api = axios.create({
-  baseURL: "http://localhost:5000/api", // your backend
+  baseURL: "http://localhost:5000/api", // your backend base URL
   headers: { "Content-Type": "application/json" },
 });
 
@@ -75,6 +75,23 @@ export const deleteNote = async (id) => {
 
 export const toggleFavorite = async (id) => {
   const res = await api.patch(`/notes/${id}/favorite`);
+  return res.data; // backend will emit noteUpdated
+};
+
+// =====================
+// COLLABORATOR ROUTES
+// =====================
+export const addCollaborator = async (noteId, collaboratorId) => {
+  const res = await api.post(`/notes/${noteId}/add-collaborator`, {
+    collaboratorId,
+  });
+  return res.data; // backend will emit noteUpdated
+};
+
+export const removeCollaborator = async (noteId, collaboratorId) => {
+  const res = await api.post(`/notes/${noteId}/remove-collaborator`, {
+    collaboratorId,
+  });
   return res.data; // backend will emit noteUpdated
 };
 
