@@ -1,10 +1,14 @@
-import Note from "../models/Note.js";
-import { io } from "../server.js";  // ⬅️ import io from server.js
+import Note from "../models/Note.js"; // Note model
+import User from "../models/User.js";
 
-// Get all notes for logged-in user
+// ==========================
+// GET ALL NOTES
+// ==========================
 export const getNotes = async (req, res) => {
   try {
-    const notes = await Note.find({ user: req.user.id }).sort({ createdAt: -1 });
+    const notes = await Note.find()
+      .populate("lastEditedBy", "username") // populate username
+      .sort({ createdAt: -1 });
     res.json(notes);
   } catch (err) {
     console.error(err);
@@ -12,32 +16,35 @@ export const getNotes = async (req, res) => {
   }
 };
 
-// Get a single note by ID for logged-in user
+// ==========================
+// GET NOTE BY ID
+// ==========================
 export const getNoteById = async (req, res) => {
   try {
-    const note = await Note.findOne({ _id: req.params.id, user: req.user.id });
+    const note = await Note.findById(req.params.id)
+      .populate("lastEditedBy", "username");
     if (!note) return res.status(404).json({ error: "Note not found" });
     res.json(note);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to get note" });
+    res.status(500).json({ error: "Failed to fetch note" });
   }
 };
 
-// Create a new note
+// ==========================
+// CREATE NOTE
+// ==========================
 export const createNote = async (req, res) => {
   try {
-    const { title, content, favorite } = req.body;
     const note = new Note({
-      title,
-      content,
-      favorite: !!favorite,
-      user: req.user.id,
+      ...req.body,
+      lastEditedBy: req.user.id, // who created the note
     });
     await note.save();
+    await note.populate("lastEditedBy", "username");
 
-    // 🔥 Emit real-time event to all connected clients
-    io.emit("noteCreated", note);
+    // Emit socket event
+    req.io.emit("noteCreated", note);
 
     res.status(201).json(note);
   } catch (err) {
@@ -46,56 +53,59 @@ export const createNote = async (req, res) => {
   }
 };
 
-// Update a note by ID
+// ==========================
+// UPDATE NOTE
+// ==========================
 export const updateNote = async (req, res) => {
   try {
-    const updated = await Note.findOneAndUpdate(
-      { _id: req.params.id, user: req.user.id },
-      { $set: req.body },
-      { new: true }
-    );
-    if (!updated) return res.status(404).json({ error: "Note not found" });
+    const note = await Note.findById(req.params.id);
+    if (!note) return res.status(404).json({ error: "Note not found" });
 
-    // 🔥 Emit real-time event
-    io.emit("noteUpdated", updated);
+    Object.assign(note, req.body);
+    note.lastEditedBy = req.user.id;
+    await note.save();
+    await note.populate("lastEditedBy", "username");
 
-    res.json(updated);
+    req.io.emit("noteUpdated", note);
+
+    res.json(note);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to update note" });
   }
 };
 
-// Delete a note by ID
+// ==========================
+// DELETE NOTE
+// ==========================
 export const deleteNote = async (req, res) => {
   try {
-    const deleted = await Note.findOneAndDelete({
-      _id: req.params.id,
-      user: req.user.id,
-    });
-    if (!deleted) return res.status(404).json({ error: "Note not found" });
+    const note = await Note.findByIdAndDelete(req.params.id);
+    if (!note) return res.status(404).json({ error: "Note not found" });
 
-    // 🔥 Emit real-time event
-    io.emit("noteDeleted", deleted._id);
+    req.io.emit("noteDeleted", note._id);
 
-    res.json({ message: "Note deleted" });
+    res.json({ success: true });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to delete note" });
   }
 };
 
-// Toggle the favorite status of a note
+// ==========================
+// TOGGLE FAVORITE
+// ==========================
 export const toggleFavorite = async (req, res) => {
   try {
-    const note = await Note.findOne({ _id: req.params.id, user: req.user.id });
+    const note = await Note.findById(req.params.id);
     if (!note) return res.status(404).json({ error: "Note not found" });
 
     note.favorite = !note.favorite;
+    note.lastEditedBy = req.user.id;
     await note.save();
+    await note.populate("lastEditedBy", "username");
 
-    // 🔥 Emit real-time event
-    io.emit("noteUpdated", note);
+    req.io.emit("noteUpdated", note);
 
     res.json(note);
   } catch (err) {

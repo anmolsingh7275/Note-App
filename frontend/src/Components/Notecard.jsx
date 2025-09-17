@@ -35,7 +35,7 @@ export default function NoteCard({
       {/* Favorite Star */}
       <div
         className="absolute top-3 right-3 cursor-pointer"
-        onClick={() => onToggleFavorite(note.id)}
+        onClick={() => onToggleFavorite(note._id)}
       >
         <FaStar
           className={`h-5 w-5 transition ${
@@ -54,6 +54,13 @@ export default function NoteCard({
       {/* Content */}
       <p className="text-black text-sm line-clamp-5">{note.content}</p>
 
+      {/* Last edited by */}
+      {note.lastEditedBy?.username && (
+        <p className="text-gray-700 text-xs mt-2">
+          Last edited by: <span className="font-medium">{note.lastEditedBy.username}</span>
+        </p>
+      )}
+
       {/* Footer */}
       <div className="flex justify-between items-center mt-4">
         {/* Date */}
@@ -62,14 +69,14 @@ export default function NoteCard({
         {/* Action Buttons */}
         <div className="flex space-x-2">
           <button
-            onClick={() => onEdit(note.id)}
+            onClick={() => onEdit(note._id)}
             className="p-2 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 transition shadow"
             title="Edit"
           >
             <FaEdit />
           </button>
           <button
-            onClick={() => onDelete(note.id)}
+            onClick={() => onDelete(note._id)}
             className="p-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition shadow"
             title="Delete"
           >

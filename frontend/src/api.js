@@ -21,6 +21,9 @@ api.interceptors.request.use((config) => {
 // =====================
 export const socket = io("http://localhost:5000", {
   autoConnect: true,
+  auth: {
+    token: localStorage.getItem("token"), // optional if backend uses JWT for socket
+  },
 });
 
 // =====================
@@ -43,7 +46,7 @@ export const getMe = async () => {
 };
 
 // =====================
-// NOTES ROUTES (REST + SOCKET)
+// NOTES ROUTES
 // =====================
 export const getNotes = async () => {
   const res = await api.get("/notes");
@@ -57,39 +60,35 @@ export const getNoteById = async (id) => {
 
 export const createNote = async (note) => {
   const res = await api.post("/notes", note);
-  socket.emit("noteCreated", res.data); // 🔥 broadcast via socket
-  return res.data;
+  return res.data; // backend will emit noteCreated
 };
 
 export const updateNote = async (id, note) => {
   const res = await api.put(`/notes/${id}`, note);
-  socket.emit("noteUpdated", res.data); // 🔥 broadcast via socket
-  return res.data;
+  return res.data; // backend will emit noteUpdated
 };
 
 export const deleteNote = async (id) => {
   const res = await api.delete(`/notes/${id}`);
-  socket.emit("noteDeleted", id); // 🔥 broadcast via socket
-  return res.data;
+  return res.data; // backend will emit noteDeleted
 };
 
 export const toggleFavorite = async (id) => {
   const res = await api.patch(`/notes/${id}/favorite`);
-  socket.emit("noteUpdated", res.data); // 🔥 broadcast
-  return res.data;
+  return res.data; // backend will emit noteUpdated
 };
 
 // =====================
-// SOCKET LISTENERS (for React components to subscribe)
+// SOCKET LISTENERS
 // =====================
 export const onNoteCreated = (callback) => {
-  socket.on("noteCreated", (note) => callback(note));
+  socket.on("noteCreated", callback);
 };
 
 export const onNoteUpdated = (callback) => {
-  socket.on("noteUpdated", (note) => callback(note));
+  socket.on("noteUpdated", callback);
 };
 
 export const onNoteDeleted = (callback) => {
-  socket.on("noteDeleted", (noteId) => callback(noteId));
+  socket.on("noteDeleted", callback);
 };
