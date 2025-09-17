@@ -1,4 +1,5 @@
 import Note from "../models/Note.js";
+import { io } from "../server.js";  // ⬅️ import io from server.js
 
 // Get all notes for logged-in user
 export const getNotes = async (req, res) => {
@@ -31,9 +32,13 @@ export const createNote = async (req, res) => {
       title,
       content,
       favorite: !!favorite,
-      user: req.user.id
+      user: req.user.id,
     });
     await note.save();
+
+    // 🔥 Emit real-time event to all connected clients
+    io.emit("noteCreated", note);
+
     res.status(201).json(note);
   } catch (err) {
     console.error(err);
@@ -50,6 +55,10 @@ export const updateNote = async (req, res) => {
       { new: true }
     );
     if (!updated) return res.status(404).json({ error: "Note not found" });
+
+    // 🔥 Emit real-time event
+    io.emit("noteUpdated", updated);
+
     res.json(updated);
   } catch (err) {
     console.error(err);
@@ -60,8 +69,15 @@ export const updateNote = async (req, res) => {
 // Delete a note by ID
 export const deleteNote = async (req, res) => {
   try {
-    const deleted = await Note.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+    const deleted = await Note.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user.id,
+    });
     if (!deleted) return res.status(404).json({ error: "Note not found" });
+
+    // 🔥 Emit real-time event
+    io.emit("noteDeleted", deleted._id);
+
     res.json({ message: "Note deleted" });
   } catch (err) {
     console.error(err);
@@ -77,6 +93,10 @@ export const toggleFavorite = async (req, res) => {
 
     note.favorite = !note.favorite;
     await note.save();
+
+    // 🔥 Emit real-time event
+    io.emit("noteUpdated", note);
+
     res.json(note);
   } catch (err) {
     console.error(err);
