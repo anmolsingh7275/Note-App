@@ -6,6 +6,7 @@ import noteRoutes from "./routes/noteRoutes.js";
 import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import userRoutes from './routes/userRoutes.js';
 
 dotenv.config();
 connectDB();
@@ -36,6 +37,7 @@ app.use((req, res, next) => {
 // routes
 app.use("/api/auth", authRoutes);
 app.use("/api/notes", noteRoutes);
+app.use('/api/users', userRoutes);
 
 // test route
 app.get("/", (req, res) => res.send("API is running..."));

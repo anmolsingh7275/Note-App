@@ -1,4 +1,6 @@
-
+// controllers/noteController.js
+import Note from "../models/Note.js";
+import User from "../models/User.js";
 
 // ==========================
 // GET ALL NOTES (owner + collaborators)
@@ -32,7 +34,6 @@ export const getNoteById = async (req, res) => {
 
     if (!note) return res.status(404).json({ error: "Note not found" });
 
-    // security: ensure user has access
     if (
       note.owner.toString() !== req.user.id &&
       !note.collaborators.includes(req.user.id)
@@ -54,13 +55,12 @@ export const createNote = async (req, res) => {
   try {
     const note = new Note({
       ...req.body,
-      owner: req.user.id, // owner is logged-in user
+      owner: req.user.id,
       lastEditedBy: req.user.id,
     });
     await note.save();
     await note.populate("lastEditedBy", "username");
 
-    // Emit socket event
     req.io.emit("noteCreated", note);
 
     res.status(201).json(note);
@@ -78,7 +78,6 @@ export const updateNote = async (req, res) => {
     const note = await Note.findById(req.params.id);
     if (!note) return res.status(404).json({ error: "Note not found" });
 
-    // security: only owner or collaborators can update
     if (
       note.owner.toString() !== req.user.id &&
       !note.collaborators.includes(req.user.id)
@@ -108,7 +107,6 @@ export const deleteNote = async (req, res) => {
     const note = await Note.findById(req.params.id);
     if (!note) return res.status(404).json({ error: "Note not found" });
 
-    // only owner can delete
     if (note.owner.toString() !== req.user.id) {
       return res.status(403).json({ error: "Only owner can delete note" });
     }
@@ -156,21 +154,14 @@ export const toggleFavorite = async (req, res) => {
 // ==========================
 // ADD COLLABORATOR
 // ==========================
-import Note from "../models/Note.js";
-import User from "../models/User.js";
-
-// ==========================
-// ADD COLLABORATOR
-// ==========================
 export const addCollaborator = async (req, res) => {
   try {
-    const noteId = req.params.id; // now from URL param
-    const { collaboratorId } = req.body; // only collaboratorId from body
+    const noteId = req.params.id;
+    const { collaboratorId } = req.body;
 
     const note = await Note.findById(noteId);
     if (!note) return res.status(404).json({ error: "Note not found" });
 
-    // only owner can add collaborators
     if (note.owner.toString() !== req.user.id) {
       return res.status(403).json({ error: "Only owner can add collaborators" });
     }
@@ -195,13 +186,12 @@ export const addCollaborator = async (req, res) => {
 // ==========================
 export const removeCollaborator = async (req, res) => {
   try {
-    const noteId = req.params.id; // from URL param
+    const noteId = req.params.id;
     const { collaboratorId } = req.body;
 
     const note = await Note.findById(noteId);
     if (!note) return res.status(404).json({ error: "Note not found" });
 
-    // only owner can remove collaborators
     if (note.owner.toString() !== req.user.id) {
       return res.status(403).json({ error: "Only owner can remove collaborators" });
     }
@@ -220,5 +210,3 @@ export const removeCollaborator = async (req, res) => {
     res.status(500).json({ error: "Failed to remove collaborator" });
   }
 };
-
-

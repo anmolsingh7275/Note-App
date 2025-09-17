@@ -16,11 +16,22 @@ export default function CollaboratorModal({ noteId, onClose }) {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      const data = await res.json();
+
+      // Check if response is JSON before parsing
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error("Invalid response from server");
+      }
+
       if (!res.ok) throw new Error(data.message || "User not found");
+
       return data._id; // backend should return user document
     } catch (err) {
-      throw new Error(err.message);
+      console.error(err.message);
+      throw new Error(err.message || "Failed to fetch user");
     }
   };
 
@@ -37,7 +48,6 @@ export default function CollaboratorModal({ noteId, onClose }) {
       setCollaborator("");
       onClose();
     } catch (err) {
-      console.error(err);
       showToast(`Failed to add collaborator ❌ (${err.message})`, "error");
     } finally {
       setLoading(false);
@@ -57,7 +67,6 @@ export default function CollaboratorModal({ noteId, onClose }) {
       setCollaborator("");
       onClose();
     } catch (err) {
-      console.error(err);
       showToast(`Failed to remove collaborator ❌ (${err.message})`, "error");
     } finally {
       setLoading(false);
