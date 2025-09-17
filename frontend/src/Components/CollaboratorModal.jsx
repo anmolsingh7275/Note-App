@@ -8,6 +8,22 @@ export default function CollaboratorModal({ noteId, onClose }) {
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
 
+  // Helper: resolve email/username to userId
+  const getUserId = async (input) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/users/find?query=${input}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "User not found");
+      return data._id; // backend should return user document
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  };
+
   const handleAdd = async () => {
     if (!collaborator.trim()) {
       showToast("Please enter an email/username", "error");
@@ -15,13 +31,14 @@ export default function CollaboratorModal({ noteId, onClose }) {
     }
     setLoading(true);
     try {
-      await addCollaborator(noteId, collaborator.trim());
+      const userId = await getUserId(collaborator.trim());
+      await addCollaborator(noteId, userId);
       showToast("Collaborator added ✅", "success");
       setCollaborator("");
-      onClose(); // close modal after success
+      onClose();
     } catch (err) {
       console.error(err);
-      showToast("Failed to add collaborator ❌", "error");
+      showToast(`Failed to add collaborator ❌ (${err.message})`, "error");
     } finally {
       setLoading(false);
     }
@@ -34,13 +51,14 @@ export default function CollaboratorModal({ noteId, onClose }) {
     }
     setLoading(true);
     try {
-      await removeCollaborator(noteId, collaborator.trim());
+      const userId = await getUserId(collaborator.trim());
+      await removeCollaborator(noteId, userId);
       showToast("Collaborator removed ✅", "success");
       setCollaborator("");
       onClose();
     } catch (err) {
       console.error(err);
-      showToast("Failed to remove collaborator ❌", "error");
+      showToast(`Failed to remove collaborator ❌ (${err.message})`, "error");
     } finally {
       setLoading(false);
     }

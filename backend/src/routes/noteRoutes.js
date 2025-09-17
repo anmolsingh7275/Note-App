@@ -24,7 +24,7 @@ router.put("/:id", updateNote);                  // Update a note
 router.delete("/:id", deleteNote);               // Delete a note
 router.patch("/:id/favorite", toggleFavorite);   // Toggle favorite
 
-// 👇 New routes for collaborators
+// 👇 Updated collaborator routes
 router.post("/:id/add-collaborator", addCollaborator);
 router.post("/:id/remove-collaborator", removeCollaborator);
 

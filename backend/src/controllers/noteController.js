@@ -1,5 +1,4 @@
-import Note from "../models/Note.js"; // Note model
-import User from "../models/User.js";
+
 
 // ==========================
 // GET ALL NOTES (owner + collaborators)
@@ -157,9 +156,16 @@ export const toggleFavorite = async (req, res) => {
 // ==========================
 // ADD COLLABORATOR
 // ==========================
+import Note from "../models/Note.js";
+import User from "../models/User.js";
+
+// ==========================
+// ADD COLLABORATOR
+// ==========================
 export const addCollaborator = async (req, res) => {
   try {
-    const { noteId, collaboratorId } = req.body;
+    const noteId = req.params.id; // now from URL param
+    const { collaboratorId } = req.body; // only collaboratorId from body
 
     const note = await Note.findById(noteId);
     if (!note) return res.status(404).json({ error: "Note not found" });
@@ -189,7 +195,8 @@ export const addCollaborator = async (req, res) => {
 // ==========================
 export const removeCollaborator = async (req, res) => {
   try {
-    const { noteId, collaboratorId } = req.body;
+    const noteId = req.params.id; // from URL param
+    const { collaboratorId } = req.body;
 
     const note = await Note.findById(noteId);
     if (!note) return res.status(404).json({ error: "Note not found" });
@@ -213,3 +220,5 @@ export const removeCollaborator = async (req, res) => {
     res.status(500).json({ error: "Failed to remove collaborator" });
   }
 };
+
+

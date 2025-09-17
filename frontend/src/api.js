@@ -79,20 +79,20 @@ export const toggleFavorite = async (id) => {
 };
 
 // =====================
-// COLLABORATOR ROUTES
+// COLLABORATOR ROUTES (FIXED)
 // =====================
 export const addCollaborator = async (noteId, collaboratorId) => {
   const res = await api.post(`/notes/${noteId}/add-collaborator`, {
     collaboratorId,
   });
-  return res.data; // backend will emit noteUpdated
+  return res.data;
 };
 
 export const removeCollaborator = async (noteId, collaboratorId) => {
   const res = await api.post(`/notes/${noteId}/remove-collaborator`, {
     collaboratorId,
   });
-  return res.data; // backend will emit noteUpdated
+  return res.data;
 };
 
 // =====================
