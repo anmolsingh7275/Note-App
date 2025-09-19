@@ -34,10 +34,12 @@ export const getNoteById = async (req, res) => {
 
     if (!note) return res.status(404).json({ error: "Note not found" });
 
-    if (
-      note.owner.toString() !== req.user.id &&
-      !note.collaborators.includes(req.user.id)
-    ) {
+    const isOwner = note.owner._id.toString() === req.user.id;
+    const isCollaborator = note.collaborators.some(
+      (c) => c._id.toString() === req.user.id
+    );
+
+    if (!isOwner && !isCollaborator) {
       return res.status(403).json({ error: "Not authorized to view this note" });
     }
 
@@ -71,17 +73,19 @@ export const createNote = async (req, res) => {
 };
 
 // ==========================
-// UPDATE NOTE
+// UPDATE NOTE (owner + collaborators)
 // ==========================
 export const updateNote = async (req, res) => {
   try {
     const note = await Note.findById(req.params.id);
     if (!note) return res.status(404).json({ error: "Note not found" });
 
-    if (
-      note.owner.toString() !== req.user.id &&
-      !note.collaborators.includes(req.user.id)
-    ) {
+    const isOwner = note.owner.toString() === req.user.id;
+    const isCollaborator = note.collaborators.some(
+      (c) => c.toString() === req.user.id
+    );
+
+    if (!isOwner && !isCollaborator) {
       return res.status(403).json({ error: "Not authorized to edit this note" });
     }
 
@@ -100,7 +104,7 @@ export const updateNote = async (req, res) => {
 };
 
 // ==========================
-// DELETE NOTE
+// DELETE NOTE (only owner)
 // ==========================
 export const deleteNote = async (req, res) => {
   try {
@@ -123,17 +127,19 @@ export const deleteNote = async (req, res) => {
 };
 
 // ==========================
-// TOGGLE FAVORITE
+// TOGGLE FAVORITE (owner + collaborators)
 // ==========================
 export const toggleFavorite = async (req, res) => {
   try {
     const note = await Note.findById(req.params.id);
     if (!note) return res.status(404).json({ error: "Note not found" });
 
-    if (
-      note.owner.toString() !== req.user.id &&
-      !note.collaborators.includes(req.user.id)
-    ) {
+    const isOwner = note.owner.toString() === req.user.id;
+    const isCollaborator = note.collaborators.some(
+      (c) => c.toString() === req.user.id
+    );
+
+    if (!isOwner && !isCollaborator) {
       return res.status(403).json({ error: "Not authorized to edit favorite" });
     }
 
@@ -152,7 +158,7 @@ export const toggleFavorite = async (req, res) => {
 };
 
 // ==========================
-// ADD COLLABORATOR
+// ADD COLLABORATOR (only owner)
 // ==========================
 export const addCollaborator = async (req, res) => {
   try {
@@ -166,7 +172,7 @@ export const addCollaborator = async (req, res) => {
       return res.status(403).json({ error: "Only owner can add collaborators" });
     }
 
-    if (!note.collaborators.includes(collaboratorId)) {
+    if (!note.collaborators.some((c) => c.toString() === collaboratorId)) {
       note.collaborators.push(collaboratorId);
       await note.save();
     }
@@ -182,7 +188,7 @@ export const addCollaborator = async (req, res) => {
 };
 
 // ==========================
-// REMOVE COLLABORATOR
+// REMOVE COLLABORATOR (only owner)
 // ==========================
 export const removeCollaborator = async (req, res) => {
   try {
